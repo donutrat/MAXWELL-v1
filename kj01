@@ -1,0 +1,924 @@
+import React, { useState } from 'react';
+import { Home, Users, DollarSign, Shield, Heart, TrendingUp, BarChart3, Building2, Clock, Package, Star, Menu, X, Plus, Search, Bell, Settings, Edit, Trash2, Save, XCircle, Calendar, Phone, Mail, Bed, Activity, Eye, Download, Upload, Filter, ChevronRight } from 'lucide-react';
+
+const BackOfficeSystem = () => {
+  const [activePage, setActivePage] = useState('home');
+  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [showNewPatientModal, setShowNewPatientModal] = useState(false);
+  const [patients, setPatients] = useState([
+    { id: 1, name: 'Margaret Thompson', age: 84, room: 'A-201', illness: 'Alzheimers', contact: '+91 98765 43210', paymentPlan: 'Self', bed: 'A-201', type: 'Skilled Nursing', notes: 'Requires 24/7 supervision', status: 'Active', admissionDate: '2024-10-15' },
+    { id: 2, name: 'Robert Chen', age: 78, room: 'B-105', illness: 'Diabetes', contact: '+91 98765 43211', paymentPlan: 'Insurance', bed: 'B-105', type: 'Assisted Living', notes: 'Insulin dependent', status: 'Active', admissionDate: '2024-11-20' },
+    { id: 3, name: 'Eleanor Martinez', age: 82, room: 'C-302', illness: 'Heart Disease', contact: '+91 98765 43212', paymentPlan: 'Self', bed: 'C-302', type: 'Home Care', notes: 'Weekly checkups required', status: 'Active', admissionDate: '2024-12-01' },
+  ]);
+  const [editingPatient, setEditingPatient] = useState(null);
+  const [newPatient, setNewPatient] = useState({
+    name: '', age: '', illness: '', contact: '', paymentPlan: 'Self', bed: '', type: 'Skilled Nursing', notes: ''
+  });
+
+  const navigationItems = [
+    { id: 'home', label: 'Dashboard', icon: Home },
+    { id: 'patients', label: 'Patient Lists', icon: Users, badge: patients.length.toString() },
+    { id: 'transactions', label: 'Transactions & Billing', icon: DollarSign, badge: '5' },
+    { id: 'insurance', label: 'Insurance Details', icon: Shield, badge: '3' },
+    { id: 'wellness', label: 'Wellness & ADL', icon: Heart, badge: '12' },
+    { id: 'revenue', label: 'Revenue & Pricing', icon: TrendingUp },
+    { id: 'pnl', label: 'P&L Analytics', icon: BarChart3 },
+    { id: 'workforce', label: 'Workforce', icon: Building2 },
+    { id: 'timeperiods', label: 'Time Periods', icon: Clock },
+    { id: 'inventory', label: 'Inventory & Equipment', icon: Package },
+    { id: 'satisfaction', label: 'Care & Satisfaction', icon: Star },
+  ];
+
+  const handleAddPatient = () => {
+    if (newPatient.name && newPatient.age) {
+      setPatients([...patients, { 
+        id: patients.length + 1, 
+        ...newPatient,
+        room: newPatient.bed,
+        status: 'Active',
+        admissionDate: new Date().toISOString().split('T')[0]
+      }]);
+      setNewPatient({ name: '', age: '', illness: '', contact: '', paymentPlan: 'Self', bed: '', type: 'Skilled Nursing', notes: '' });
+      setShowNewPatientModal(false);
+    }
+  };
+
+  const handleEditPatient = (patient) => {
+    setEditingPatient({ ...patient });
+  };
+
+  const handleSavePatient = () => {
+    setPatients(patients.map(p => p.id === editingPatient.id ? editingPatient : p));
+    setEditingPatient(null);
+  };
+
+  const handleDeletePatient = (id) => {
+    if (window.confirm('Are you sure you want to remove this patient?')) {
+      setPatients(patients.filter(p => p.id !== id));
+    }
+  };
+
+  const NewPatientModal = () => (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" onClick={() => setShowNewPatientModal(false)}>
+      <div className="bg-white rounded-2xl p-8 max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
+        <div className="flex items-center justify-between mb-6">
+          <h2 className="text-2xl font-bold text-gray-900">Add New Patient</h2>
+          <button onClick={() => setShowNewPatientModal(false)} className="p-2 hover:bg-gray-100 rounded-lg">
+            <XCircle className="w-6 h-6 text-gray-500" />
+          </button>
+        </div>
+
+        <div className="space-y-4">
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">Full Name *</label>
+              <input
+                type="text"
+                value={newPatient.name}
+                onChange={(e) => setNewPatient({ ...newPatient, name: e.target.value })}
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent"
+                placeholder="Enter patient name"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">Age *</label>
+              <input
+                type="number"
+                value={newPatient.age}
+                onChange={(e) => setNewPatient({ ...newPatient, age: e.target.value })}
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent"
+                placeholder="Age"
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">Primary Illness</label>
+              <input
+                type="text"
+                value={newPatient.illness}
+                onChange={(e) => setNewPatient({ ...newPatient, illness: e.target.value })}
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent"
+                placeholder="e.g., Alzheimers, Diabetes"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">Contact Number</label>
+              <input
+                type="tel"
+                value={newPatient.contact}
+                onChange={(e) => setNewPatient({ ...newPatient, contact: e.target.value })}
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent"
+                placeholder="+91 98765 43210"
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">Payment Plan</label>
+              <select
+                value={newPatient.paymentPlan}
+                onChange={(e) => setNewPatient({ ...newPatient, paymentPlan: e.target.value })}
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent"
+              >
+                <option value="Self">Self Pay</option>
+                <option value="Insurance">Insurance</option>
+                <option value="Government">Government Assistance</option>
+                <option value="Family">Family Sponsored</option>
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">Bed Number</label>
+              <input
+                type="text"
+                value={newPatient.bed}
+                onChange={(e) => setNewPatient({ ...newPatient, bed: e.target.value })}
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent"
+                placeholder="e.g., A-201"
+              />
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-sm font-semibold text-gray-700 mb-2">Care Type</label>
+            <select
+              value={newPatient.type}
+              onChange={(e) => setNewPatient({ ...newPatient, type: e.target.value })}
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent"
+            >
+              <option value="Skilled Nursing">Skilled Nursing</option>
+              <option value="Assisted Living">Assisted Living</option>
+              <option value="Home Care">Home Care</option>
+              <option value="Memory Care">Memory Care</option>
+            </select>
+          </div>
+
+          <div>
+            <label className="block text-sm font-semibold text-gray-700 mb-2">Patient Notes</label>
+            <textarea
+              value={newPatient.notes}
+              onChange={(e) => setNewPatient({ ...newPatient, notes: e.target.value })}
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent"
+              rows="3"
+              placeholder="Add any special notes, care requirements, or important information..."
+            />
+          </div>
+
+          <div className="flex gap-3 pt-4">
+            <button
+              onClick={handleAddPatient}
+              className="flex-1 bg-teal-600 text-white py-3 rounded-lg font-semibold hover:bg-teal-700 transition-all"
+            >
+              Add Patient
+            </button>
+            <button
+              onClick={() => setShowNewPatientModal(false)}
+              className="flex-1 bg-gray-200 text-gray-700 py-3 rounded-lg font-semibold hover:bg-gray-300 transition-all"
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+
+  return (
+    <div className="flex h-screen bg-gray-50">
+      {showNewPatientModal && <NewPatientModal />}
+
+      {/* Sidebar */}
+      <div className={`${sidebarOpen ? 'w-72' : 'w-20'} bg-white border-r border-gray-200 transition-all duration-300 flex flex-col shadow-lg`}>
+        <div className="h-16 flex items-center justify-between px-6 border-b border-gray-200 bg-gradient-to-r from-teal-600 to-teal-700">
+          {sidebarOpen && <h1 className="text-xl font-bold text-white">MAXWELL</h1>}
+          <button onClick={() => setSidebarOpen(!sidebarOpen)} className="p-2 hover:bg-teal-700 rounded-lg text-white">
+            {sidebarOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+          </button>
+        </div>
+
+        <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
+          {navigationItems.map((item) => {
+            const Icon = item.icon;
+            return (
+              <button
+                key={item.id}
+                onClick={() => setActivePage(item.id)}
+                className={`w-full flex items-center justify-between gap-3 px-3 py-3 rounded-lg transition-all ${
+                  activePage === item.id ? 'bg-teal-50 text-teal-600 shadow-sm' : 'text-gray-700 hover:bg-gray-50'
+                }`}
+              >
+                <div className="flex items-center gap-3">
+                  <Icon className="w-5 h-5 flex-shrink-0" />
+                  {sidebarOpen && <span className="text-sm font-medium">{item.label}</span>}
+                </div>
+                {sidebarOpen && item.badge && (
+                  <span className={`px-2 py-0.5 text-xs font-medium rounded-full ${
+                    activePage === item.id ? 'bg-teal-600 text-white' : 'bg-gray-200 text-gray-700'
+                  }`}>
+                    {item.badge}
+                  </span>
+                )}
+              </button>
+            );
+          })}
+        </nav>
+
+        <div className="p-3 border-t border-gray-200">
+          <button 
+            onClick={() => setShowNewPatientModal(true)}
+            className="w-full py-3 bg-teal-600 text-white rounded-lg hover:bg-teal-700 font-medium text-sm flex items-center justify-center gap-2 shadow-sm"
+          >
+            {sidebarOpen ? <><Plus className="w-5 h-5" />New Patient</> : <Plus className="w-5 h-5" />}
+          </button>
+        </div>
+      </div>
+
+      {/* Main Content */}
+      <div className="flex-1 flex flex-col overflow-hidden">
+        <header className="h-16 bg-white border-b border-gray-200 flex items-center justify-between px-6 shadow-sm">
+          <h2 className="text-xl font-semibold text-gray-900">
+            {navigationItems.find(item => item.id === activePage)?.label || 'Dashboard'}
+          </h2>
+          
+          <div className="flex items-center gap-4">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+              <input type="text" placeholder="Search..." className="pl-10 pr-4 py-2 border rounded-lg w-64" />
+            </div>
+            <button className="p-2 hover:bg-gray-100 rounded-lg relative">
+              <Bell className="w-5 h-5 text-gray-600" />
+              <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
+            </button>
+            <button className="p-2 hover:bg-gray-100 rounded-lg">
+              <Settings className="w-5 h-5 text-gray-600" />
+            </button>
+            <div className="w-10 h-10 bg-teal-600 rounded-full flex items-center justify-center text-white font-medium">A</div>
+          </div>
+        </header>
+
+        <main className="flex-1 overflow-y-auto p-6">
+          {activePage === 'home' && (
+            <div className="space-y-6">
+              <div className="grid grid-cols-4 gap-6">
+                <div className="bg-white rounded-xl shadow-sm border p-6">
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="bg-teal-50 p-3 rounded-xl">
+                      <Users className="w-6 h-6 text-teal-600" />
+                    </div>
+                    <span className="text-sm text-green-600 font-medium">+2</span>
+                  </div>
+                  <div className="text-3xl font-bold">{patients.length}</div>
+                  <div className="text-sm text-gray-600">Active Patients</div>
+                </div>
+
+                <div className="bg-white rounded-xl shadow-sm border p-6">
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="bg-purple-50 p-3 rounded-xl">
+                      <DollarSign className="w-6 h-6 text-purple-600" />
+                    </div>
+                    <span className="text-sm text-green-600 font-medium">+12%</span>
+                  </div>
+                  <div className="text-3xl font-bold">₹24.5L</div>
+                  <div className="text-sm text-gray-600">Monthly Revenue</div>
+                </div>
+
+                <div className="bg-white rounded-xl shadow-sm border p-6">
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="bg-orange-50 p-3 rounded-xl">
+                      <Activity className="w-6 h-6 text-orange-600" />
+                    </div>
+                    <span className="text-sm text-orange-600 font-medium">12 Pending</span>
+                  </div>
+                  <div className="text-3xl font-bold">ADL</div>
+                  <div className="text-sm text-gray-600">Care Tasks</div>
+                </div>
+
+                <div className="bg-white rounded-xl shadow-sm border p-6">
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="bg-blue-50 p-3 rounded-xl">
+                      <Star className="w-6 h-6 text-blue-600" />
+                    </div>
+                    <span className="text-sm text-blue-600 font-medium">98%</span>
+                  </div>
+                  <div className="text-3xl font-bold">4.8</div>
+                  <div className="text-sm text-gray-600">Satisfaction Score</div>
+                </div>
+              </div>
+
+              <div className="bg-white rounded-xl shadow-sm border p-6">
+                <h3 className="text-lg font-semibold mb-4">Recent Activity</h3>
+                <div className="space-y-3">
+                  {[
+                    { action: 'New patient admitted', patient: 'Eleanor Martinez', time: '2 hours ago', type: 'admission' },
+                    { action: 'Payment received', patient: 'Robert Chen', time: '5 hours ago', type: 'payment' },
+                    { action: 'ADL completed', patient: 'Margaret Thompson', time: '1 day ago', type: 'care' },
+                  ].map((activity, i) => (
+                    <div key={i} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                      <div>
+                        <div className="font-medium text-gray-900">{activity.action}</div>
+                        <div className="text-sm text-gray-600">{activity.patient}</div>
+                      </div>
+                      <span className="text-xs text-gray-500">{activity.time}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {activePage === 'patients' && (
+            <div className="space-y-6">
+              <div className="bg-white rounded-xl shadow-sm border p-6">
+                <div className="flex items-center justify-between mb-4">
+                  <h2 className="text-xl font-bold">Patient Management</h2>
+                  <div className="flex gap-3">
+                    <button className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 flex items-center gap-2">
+                      <Filter className="w-4 h-4" />
+                      Filter
+                    </button>
+                    <button className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 flex items-center gap-2">
+                      <Download className="w-4 h-4" />
+                      Export
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <div className="bg-white rounded-xl shadow-sm border overflow-hidden">
+                <table className="w-full">
+                  <thead className="bg-gray-50">
+                    <tr>
+                      <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase">Patient</th>
+                      <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase">Age</th>
+                      <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase">Bed</th>
+                      <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase">Care Type</th>
+                      <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase">Payment</th>
+                      <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
+                      <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y">
+                    {patients.map(patient => (
+                      editingPatient && editingPatient.id === patient.id ? (
+                        <tr key={patient.id} className="bg-blue-50">
+                          <td className="px-6 py-4">
+                            <input
+                              type="text"
+                              value={editingPatient.name}
+                              onChange={(e) => setEditingPatient({ ...editingPatient, name: e.target.value })}
+                              className="px-2 py-1 border rounded w-full"
+                            />
+                          </td>
+                          <td className="px-6 py-4">
+                            <input
+                              type="number"
+                              value={editingPatient.age}
+                              onChange={(e) => setEditingPatient({ ...editingPatient, age: e.target.value })}
+                              className="px-2 py-1 border rounded w-20"
+                            />
+                          </td>
+                          <td className="px-6 py-4">
+                            <input
+                              type="text"
+                              value={editingPatient.bed}
+                              onChange={(e) => setEditingPatient({ ...editingPatient, bed: e.target.value })}
+                              className="px-2 py-1 border rounded w-24"
+                            />
+                          </td>
+                          <td className="px-6 py-4">
+                            <select
+                              value={editingPatient.type}
+                              onChange={(e) => setEditingPatient({ ...editingPatient, type: e.target.value })}
+                              className="px-2 py-1 border rounded"
+                            >
+                              <option>Skilled Nursing</option>
+                              <option>Assisted Living</option>
+                              <option>Home Care</option>
+                            </select>
+                          </td>
+                          <td className="px-6 py-4">
+                            <select
+                              value={editingPatient.paymentPlan}
+                              onChange={(e) => setEditingPatient({ ...editingPatient, paymentPlan: e.target.value })}
+                              className="px-2 py-1 border rounded"
+                            >
+                              <option>Self</option>
+                              <option>Insurance</option>
+                              <option>Government</option>
+                            </select>
+                          </td>
+                          <td className="px-6 py-4">
+                            <span className="px-3 py-1 text-xs bg-green-100 text-green-700 rounded-full">Active</span>
+                          </td>
+                          <td className="px-6 py-4">
+                            <div className="flex gap-2">
+                              <button onClick={handleSavePatient} className="p-1 hover:bg-green-100 rounded">
+                                <Save className="w-4 h-4 text-green-600" />
+                              </button>
+                              <button onClick={() => setEditingPatient(null)} className="p-1 hover:bg-gray-100 rounded">
+                                <XCircle className="w-4 h-4 text-gray-600" />
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      ) : (
+                        <tr key={patient.id} className="hover:bg-gray-50">
+                          <td className="px-6 py-4">
+                            <div className="flex items-center gap-3">
+                              <div className="w-10 h-10 bg-teal-100 rounded-full flex items-center justify-center">
+                                <span className="text-teal-600 font-medium text-sm">
+                                  {patient.name.split(' ').map(n => n[0]).join('')}
+                                </span>
+                              </div>
+                              <div>
+                                <div className="font-medium text-gray-900">{patient.name}</div>
+                                <div className="text-sm text-gray-500">{patient.illness}</div>
+                              </div>
+                            </div>
+                          </td>
+                          <td className="px-6 py-4">{patient.age} yrs</td>
+                          <td className="px-6 py-4 font-medium">{patient.bed}</td>
+                          <td className="px-6 py-4">
+                            <span className="px-3 py-1 text-xs bg-purple-100 text-purple-700 rounded-full">
+                              {patient.type}
+                            </span>
+                          </td>
+                          <td className="px-6 py-4">
+                            <span className="px-3 py-1 text-xs bg-blue-100 text-blue-700 rounded-full">
+                              {patient.paymentPlan}
+                            </span>
+                          </td>
+                          <td className="px-6 py-4">
+                            <span className="px-3 py-1 text-xs bg-green-100 text-green-700 rounded-full">
+                              {patient.status}
+                            </span>
+                          </td>
+                          <td className="px-6 py-4">
+                            <div className="flex gap-2">
+                              <button onClick={() => handleEditPatient(patient)} className="p-1 hover:bg-gray-100 rounded">
+                                <Edit className="w-4 h-4 text-gray-600" />
+                              </button>
+                              <button className="p-1 hover:bg-gray-100 rounded">
+                                <Eye className="w-4 h-4 text-gray-600" />
+                              </button>
+                              <button onClick={() => handleDeletePatient(patient.id)} className="p-1 hover:bg-red-100 rounded">
+                                <Trash2 className="w-4 h-4 text-red-600" />
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      )
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
+
+          {activePage === 'transactions' && (
+            <div className="space-y-6">
+              <div className="grid grid-cols-4 gap-6">
+                <div className="bg-gradient-to-br from-green-500 to-emerald-600 rounded-xl p-6 text-white shadow-lg">
+                  <div className="text-3xl font-bold mb-1">₹24.5L</div>
+                  <div className="text-sm opacity-90">Monthly Revenue</div>
+                </div>
+                <div className="bg-white rounded-xl shadow-sm border p-6">
+                  <div className="text-3xl font-bold">₹3.2L</div>
+                  <div className="text-sm text-gray-600">Pending Payments</div>
+                </div>
+                <div className="bg-white rounded-xl shadow-sm border p-6">
+                  <div className="text-3xl font-bold">96%</div>
+                  <div className="text-sm text-gray-600">Collection Rate</div>
+                </div>
+                <div className="bg-white rounded-xl shadow-sm border p-6">
+                  <div className="text-3xl font-bold">4</div>
+                  <div className="text-sm text-gray-600">Overdue Accounts</div>
+                </div>
+              </div>
+
+              <div className="bg-white rounded-xl shadow-sm border overflow-hidden">
+                <div className="p-6 border-b">
+                  <h3 className="text-lg font-semibold">Recent Transactions</h3>
+                </div>
+                <table className="w-full">
+                  <thead className="bg-gray-50">
+                    <tr>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Invoice ID</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Patient</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Amount</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Date</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y">
+                    {[
+                      { id: 'INV-001', patient: 'Margaret Thompson', amount: '₹52,000', date: 'Feb 01, 2025', status: 'paid' },
+                      { id: 'INV-002', patient: 'Robert Chen', amount: '₹48,000', date: 'Feb 01, 2025', status: 'pending' },
+                      { id: 'INV-003', patient: 'Eleanor Martinez', amount: '₹55,000', date: 'Jan 28, 2025', status: 'overdue' },
+                      { id: 'INV-004', patient: 'Margaret Thompson', amount: '₹12,000', date: 'Jan 25, 2025', status: 'paid' },
+                      { id: 'INV-005', patient: 'Robert Chen', amount: '₹8,500', date: 'Jan 22, 2025', status: 'pending' },
+                    ].map((inv, i) => (
+                      <tr key={i} className="hover:bg-gray-50">
+                        <td className="px-6 py-4 text-sm font-medium text-teal-600">{inv.id}</td>
+                        <td className="px-6 py-4 text-sm text-gray-900">{inv.patient}</td>
+                        <td className="px-6 py-4 text-sm font-bold">{inv.amount}</td>
+                        <td className="px-6 py-4 text-sm text-gray-600">{inv.date}</td>
+                        <td className="px-6 py-4">
+                          <span className={`px-3 py-1 text-xs font-medium rounded-full ${
+                            inv.status === 'paid' ? 'bg-green-100 text-green-700' :
+                            inv.status === 'overdue' ? 'bg-red-100 text-red-700' :
+                            'bg-yellow-100 text-yellow-700'
+                          }`}>{inv.status.charAt(0).toUpperCase() + inv.status.slice(1)}</span>
+                        </td>
+                        <td className="px-6 py-4">
+                          <div className="flex gap-2">
+                            <button className="p-1 hover:bg-gray-100 rounded"><Eye className="w-4 h-4 text-gray-600" /></button>
+                            <button className="p-1 hover:bg-gray-100 rounded"><Download className="w-4 h-4 text-gray-600" /></button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
+
+          {activePage === 'insurance' && (
+            <div className="space-y-6">
+              <div className="grid grid-cols-4 gap-6">
+                <div className="bg-white rounded-xl shadow-sm border p-6">
+                  <div className="text-3xl font-bold text-green-600">18</div>
+                  <div className="text-sm text-gray-600">Approved Claims</div>
+                </div>
+                <div className="bg-white rounded-xl shadow-sm border p-6">
+                  <div className="text-3xl font-bold text-blue-600">7</div>
+                  <div className="text-sm text-gray-600">Under Review</div>
+                </div>
+                <div className="bg-white rounded-xl shadow-sm border p-6">
+                  <div className="text-3xl font-bold text-yellow-600">5</div>
+                  <div className="text-sm text-gray-600">Action Required</div>
+                </div>
+                <div className="bg-white rounded-xl shadow-sm border p-6">
+                  <div className="text-3xl font-bold text-red-600">3</div>
+                  <div className="text-sm text-gray-600">Rejected</div>
+                </div>
+              </div>
+              <div className="bg-white rounded-xl shadow-sm border overflow-hidden">
+                <div className="p-6 border-b flex items-center justify-between">
+                  <h3 className="text-lg font-semibold">Insurance Claims</h3>
+                  <button className="px-4 py-2 bg-teal-600 text-white rounded-lg text-sm font-medium">+ New Claim</button>
+                </div>
+                <table className="w-full">
+                  <thead className="bg-gray-50">
+                    <tr>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Claim ID</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Patient</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Insurer</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Amount</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y">
+                    {[
+                      { id: 'CLM-101', patient: 'Margaret Thompson', insurer: 'Star Health', amount: '₹45,000', status: 'approved' },
+                      { id: 'CLM-102', patient: 'Robert Chen', insurer: 'HDFC Ergo', amount: '₹32,000', status: 'review' },
+                      { id: 'CLM-103', patient: 'Eleanor Martinez', insurer: 'ICICI Lombard', amount: '₹28,500', status: 'pending' },
+                      { id: 'CLM-104', patient: 'Margaret Thompson', insurer: 'Star Health', amount: '₹18,000', status: 'rejected' },
+                    ].map((claim, i) => (
+                      <tr key={i} className="hover:bg-gray-50">
+                        <td className="px-6 py-4 text-sm font-medium text-teal-600">{claim.id}</td>
+                        <td className="px-6 py-4 text-sm">{claim.patient}</td>
+                        <td className="px-6 py-4 text-sm text-gray-600">{claim.insurer}</td>
+                        <td className="px-6 py-4 text-sm font-bold">{claim.amount}</td>
+                        <td className="px-6 py-4">
+                          <span className={`px-3 py-1 text-xs font-medium rounded-full ${
+                            claim.status === 'approved' ? 'bg-green-100 text-green-700' :
+                            claim.status === 'rejected' ? 'bg-red-100 text-red-700' :
+                            claim.status === 'review' ? 'bg-blue-100 text-blue-700' :
+                            'bg-yellow-100 text-yellow-700'
+                          }`}>{claim.status.charAt(0).toUpperCase() + claim.status.slice(1)}</span>
+                        </td>
+                        <td className="px-6 py-4">
+                          <div className="flex gap-2">
+                            <button className="p-1 hover:bg-gray-100 rounded"><Eye className="w-4 h-4 text-gray-600" /></button>
+                            <button className="p-1 hover:bg-gray-100 rounded"><Edit className="w-4 h-4 text-gray-600" /></button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
+
+          {activePage === 'wellness' && (
+            <div className="space-y-6">
+              <div className="grid grid-cols-6 gap-4">
+                {[
+                  { label: 'Bathing', done: 28, total: 32 },
+                  { label: 'Dressing', done: 42, total: 45 },
+                  { label: 'Toileting', done: 45, total: 48 },
+                  { label: 'Mobility', done: 35, total: 38 },
+                  { label: 'Eating', done: 46, total: 48 },
+                  { label: 'Grooming', done: 38, total: 40 },
+                ].map((adl, i) => (
+                  <div key={i} className="bg-white rounded-xl shadow-sm border p-4">
+                    <div className="text-xl font-bold text-teal-600">{adl.done}/{adl.total}</div>
+                    <div className="text-sm text-gray-600 mb-2">{adl.label}</div>
+                    <div className="w-full bg-gray-200 rounded-full h-2">
+                      <div className="bg-teal-500 h-2 rounded-full" style={{ width: `${(adl.done / adl.total) * 100}%` }}></div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+              <div className="bg-white rounded-xl shadow-sm border overflow-hidden">
+                <div className="p-6 border-b flex items-center justify-between">
+                  <h3 className="text-lg font-semibold">ADL Tasks - Today</h3>
+                  <button className="px-4 py-2 bg-teal-600 text-white rounded-lg text-sm font-medium">+ Add Task</button>
+                </div>
+                <table className="w-full">
+                  <thead className="bg-gray-50">
+                    <tr>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Patient</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Task</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Assigned To</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Time</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Mark</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y">
+                    {[
+                      { patient: 'Margaret Thompson', task: 'Morning Bathing', staff: 'Nurse Sarah', time: '8:00 AM', status: 'done' },
+                      { patient: 'Robert Chen', task: 'Dressing Assistance', staff: 'Nurse Sarah', time: '8:30 AM', status: 'done' },
+                      { patient: 'Eleanor Martinez', task: 'Mobility Exercise', staff: 'Physio Mike', time: '10:00 AM', status: 'pending' },
+                      { patient: 'Margaret Thompson', task: 'Grooming', staff: 'Nurse Jane', time: '11:00 AM', status: 'pending' },
+                      { patient: 'Robert Chen', task: 'Eating Assistance', staff: 'Nurse Jane', time: '12:30 PM', status: 'upcoming' },
+                    ].map((task, i) => (
+                      <tr key={i} className="hover:bg-gray-50">
+                        <td className="px-6 py-4 text-sm font-medium">{task.patient}</td>
+                        <td className="px-6 py-4 text-sm">{task.task}</td>
+                        <td className="px-6 py-4 text-sm text-gray-600">{task.staff}</td>
+                        <td className="px-6 py-4 text-sm text-gray-600">{task.time}</td>
+                        <td className="px-6 py-4">
+                          <span className={`px-3 py-1 text-xs font-medium rounded-full ${
+                            task.status === 'done' ? 'bg-green-100 text-green-700' :
+                            task.status === 'pending' ? 'bg-yellow-100 text-yellow-700' :
+                            'bg-gray-100 text-gray-700'
+                          }`}>{task.status.charAt(0).toUpperCase() + task.status.slice(1)}</span>
+                        </td>
+                        <td className="px-6 py-4">
+                          <input type="checkbox" defaultChecked={task.status === 'done'} className="w-4 h-4 text-teal-600" />
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
+
+          {activePage === 'revenue' && (
+            <div className="space-y-6">
+              <div className="grid grid-cols-4 gap-6">
+                <div className="bg-gradient-to-br from-teal-500 to-teal-700 rounded-xl p-6 text-white shadow-lg">
+                  <div className="text-3xl font-bold">₹24.5L</div>
+                  <div className="text-sm opacity-90">Total Revenue</div>
+                  <div className="text-xs mt-2 opacity-75">+12% vs last month</div>
+                </div>
+                <div className="bg-white rounded-xl shadow-sm border p-6">
+                  <div className="text-3xl font-bold text-gray-900">₹52,000</div>
+                  <div className="text-sm text-gray-600">Avg Revenue / Patient</div>
+                </div>
+                <div className="bg-white rounded-xl shadow-sm border p-6">
+                  <div className="text-3xl font-bold text-gray-900">96%</div>
+                  <div className="text-sm text-gray-600">Occupancy Rate</div>
+                </div>
+                <div className="bg-white rounded-xl shadow-sm border p-6">
+                  <div className="text-3xl font-bold text-gray-900">₹8,200</div>
+                  <div className="text-sm text-gray-600">Daily Avg Revenue</div>
+                </div>
+              </div>
+              <div className="bg-white rounded-xl shadow-sm border overflow-hidden">
+                <div className="p-6 border-b flex items-center justify-between">
+                  <h3 className="text-lg font-semibold">Revenue by Care Type</h3>
+                  <button className="px-4 py-2 border border-gray-300 rounded-lg text-sm flex items-center gap-2"><Download className="w-4 h-4" />Export</button>
+                </div>
+                <div className="p-6 space-y-6">
+                  {[
+                    { type: 'Skilled Nursing', revenue: '₹12.4L', percent: 51, color: 'bg-teal-500' },
+                    { type: 'Assisted Living', revenue: '₹7.8L', percent: 32, color: 'bg-purple-500' },
+                    { type: 'Home Care', revenue: '₹4.3L', percent: 17, color: 'bg-orange-500' },
+                  ].map((item, i) => (
+                    <div key={i}>
+                      <div className="flex justify-between mb-2">
+                        <span className="font-semibold">{item.type}</span>
+                        <span className="font-bold text-gray-900">{item.revenue} <span className="text-sm text-gray-500">({item.percent}%)</span></span>
+                      </div>
+                      <div className="w-full bg-gray-200 rounded-full h-3">
+                        <div className={`${item.color} h-3 rounded-full`} style={{ width: `${item.percent}%` }}></div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+              <div className="bg-white rounded-xl shadow-sm border overflow-hidden">
+                <div className="p-6 border-b">
+                  <h3 className="text-lg font-semibold">Pricing Plans</h3>
+                </div>
+                <table className="w-full">
+                  <thead className="bg-gray-50">
+                    <tr>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Care Type</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Monthly Rate</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Daily Rate</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Patients</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y">
+                    {[
+                      { type: 'Skilled Nursing', monthly: '₹52,000', daily: '₹1,733', patients: 18 },
+                      { type: 'Assisted Living', monthly: '₹38,000', daily: '₹1,267', patients: 22 },
+                      { type: 'Home Care', monthly: '₹25,000', daily: '₹833', patients: 8 },
+                      { type: 'Memory Care', monthly: '₹62,000', daily: '₹2,067', patients: 5 },
+                    ].map((plan, i) => (
+                      <tr key={i} className="hover:bg-gray-50">
+                        <td className="px-6 py-4 font-medium">{plan.type}</td>
+                        <td className="px-6 py-4 font-bold text-teal-600">{plan.monthly}</td>
+                        <td className="px-6 py-4 text-gray-600">{plan.daily}</td>
+                        <td className="px-6 py-4">{plan.patients}</td>
+                        <td className="px-6 py-4"><button className="p-1 hover:bg-gray-100 rounded"><Edit className="w-4 h-4 text-gray-600" /></button></td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
+
+          {activePage === 'pnl' && (
+            <div className="space-y-6">
+              <div className="grid grid-cols-4 gap-6">
+                <div className="bg-white rounded-xl shadow-sm border p-6">
+                  <div className="text-sm text-gray-500 mb-1">Total Income</div>
+                  <div className="text-3xl font-bold text-green-600">₹24.5L</div>
+                </div>
+                <div className="bg-white rounded-xl shadow-sm border p-6">
+                  <div className="text-sm text-gray-500 mb-1">Total Expenses</div>
+                  <div className="text-3xl font-bold text-red-600">₹18.2L</div>
+                </div>
+                <div className="bg-white rounded-xl shadow-sm border p-6">
+                  <div className="text-sm text-gray-500 mb-1">Net Profit</div>
+                  <div className="text-3xl font-bold text-teal-600">₹6.3L</div>
+                </div>
+                <div className="bg-white rounded-xl shadow-sm border p-6">
+                  <div className="text-sm text-gray-500 mb-1">Profit Margin</div>
+                  <div className="text-3xl font-bold text-purple-600">25.7%</div>
+                </div>
+              </div>
+              <div className="bg-white rounded-xl shadow-sm border overflow-hidden">
+                <div className="p-6 border-b"><h3 className="text-lg font-semibold">Profit & Loss Statement</h3></div>
+                <table className="w-full">
+                  <thead className="bg-gray-50">
+                    <tr>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Category</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Last Month</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">This Month</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Change</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y">
+                    {[
+                      { cat: 'Patient Revenue', last: '₹22.1L', curr: '₹24.5L', change: '+10.8%', type: 'income' },
+                      { cat: 'Insurance Claims', last: '₹3.2L', curr: '₹3.8L', change: '+18.7%', type: 'income' },
+                      { cat: 'Staff Salaries', last: '₹10.5L', curr: '₹11.2L', change: '+6.6%', type: 'expense' },
+                      { cat: 'Supplies & Inventory', last: '₹3.1L', curr: '₹2.9L', change: '-6.4%', type: 'expense' },
+                      { cat: 'Utilities & Maintenance', last: '₹2.4L', curr: '₹2.5L', change: '+4.2%', type: 'expense' },
+                      { cat: 'Food & Nutrition', last: '₹1.8L', curr: '₹1.6L', change: '-11.1%', type: 'expense' },
+                    ].map((row, i) => (
+                      <tr key={i} className="hover:bg-gray-50">
+                        <td className="px-6 py-4 font-medium flex items-center gap-2">
+                          <span className={`w-3 h-3 rounded-full ${row.type === 'income' ? 'bg-green-500' : 'bg-red-500'}`}></span>
+                          {row.cat}
+                        </td>
+                        <td className="px-6 py-4 text-gray-600">{row.last}</td>
+                        <td className="px-6 py-4 font-bold">{row.curr}</td>
+                        <td className="px-6 py-4">
+                          <span className={`text-sm font-semibold ${row.change.startsWith('+') ? 'text-green-600' : 'text-red-600'}`}>{row.change}</span>
+                        </td>
+                        <td className="px-6 py-4"><button className="p-1 hover:bg-gray-100 rounded"><Edit className="w-4 h-4 text-gray-600" /></button></td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
+
+          {activePage === 'workforce' && (
+            <div className="space-y-6">
+              <div className="grid grid-cols-4 gap-6">
+                <div className="bg-white rounded-xl shadow-sm border p-6">
+                  <div className="text-3xl font-bold text-teal-600">32</div>
+                  <div className="text-sm text-gray-600">Total Staff</div>
+                </div>
+                <div className="bg-white rounded-xl shadow-sm border p-6">
+                  <div className="text-3xl font-bold text-green-600">17</div>
+                  <div className="text-sm text-gray-600">On Duty Today</div>
+                </div>
+                <div className="bg-white rounded-xl shadow-sm border p-6">
+                  <div className="text-3xl font-bold text-purple-600">2.8:1</div>
+                  <div className="text-sm text-gray-600">Staff-Patient Ratio</div>
+                </div>
+                <div className="bg-white rounded-xl shadow-sm border p-6">
+                  <div className="text-3xl font-bold text-orange-600">3</div>
+                  <div className="text-sm text-gray-600">Open Shifts</div>
+                </div>
+              </div>
+              <div className="bg-white rounded-xl shadow-sm border overflow-hidden">
+                <div className="p-6 border-b flex items-center justify-between">
+                  <h3 className="text-lg font-semibold">Staff Directory</h3>
+                  <button className="px-4 py-2 bg-teal-600 text-white rounded-lg text-sm font-medium">+ Add Staff</button>
+                </div>
+                <table className="w-full">
+                  <thead className="bg-gray-50">
+                    <tr>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Name</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Role</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Shift</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Patients</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y">
+                    {[
+                      { name: 'Sarah Mitchell', role: 'Lead Caregiver', shift: '7AM - 7PM', patients: 6, status: 'on-duty' },
+                      { name: 'Michael Rodriguez', role: 'RN', shift: '7AM - 7PM', patients: 10, status: 'on-duty' },
+                      { name: 'Jennifer Lee', role: 'Physiotherapist', shift: '9AM - 5PM', patients: 4, status: 'on-duty' },
+                      { name: 'David Thompson', role: 'Caregiver', shift: '3PM - 11PM', patients: 5, status: 'scheduled' },
+                      { name: 'Priya Nair', role: 'Nurse', shift: '11PM - 7AM', patients: 8, status: 'off' },
+                    ].map((staff, i) => (
+                      <tr key={i} className="hover:bg-gray-50">
+                        <td className="px-6 py-4">
+                          <div className="flex items-center gap-3">
+                            <div className="w-9 h-9 bg-teal-100 rounded-full flex items-center justify-center">
+                              <span className="text-teal-600 font-medium text-sm">{staff.name.split(' ').map(n => n[0]).join('')}</span>
+                            </div>
+                            <span className="font-medium">{staff.name}</span>
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 text-sm text-gray-600">{staff.role}</td>
+                        <td className="px-6 py-4 text-sm text-gray-600">{staff.shift}</td>
+                        <td className="px-6 py-4 text-sm">{staff.patients}</td>
+                        <td className="px-6 py-4">
+                          <span className={`px-3 py-1 text-xs font-medium rounded-full ${
+                            staff.status === 'on-duty' ? 'bg-green-100 text-green-700' :
+                            staff.status === 'scheduled' ? 'bg-blue-100 text-blue-700' :
+                            'bg-gray-100 text-gray-600'
+                          }`}>{staff.status.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase())}</span>
+                        </td>
+                        <td className="px-6 py-4">
+                          <div className="flex gap-2">
+                            <button className="p-1 hover:bg-gray-100 rounded"><Edit className="w-4 h-4 text-gray-600" /></button>
+                            <button className="p-1 hover:bg-gray-100 rounded"><Eye className="w-4 h-4 text-gray-600" /></button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
+
+          {activePage === 'timeperiods' && (
+            <div className="space-y-6">
+              <div className="grid grid-cols-4 gap-6">
+                <div className="bg-white rounded-xl shadow-sm border p-6">
+                  <div className="text-3xl font-bold text-teal-600">48</div>
+                  <div className="text-sm text-gray-600">Active Patients</div>
+                </div>
+                <div className="bg-white rounded-xl shadow-sm border p-6">
+                  <div className="text-3xl font-bold text-purple-600">12</div>
+                  <div className="text-sm text-gray-600">Avg Stay (weeks)</div>
+                </div>
+                <div className="bg-white rounded-xl shadow-sm border p-6">
+                  <div className="text-3xl font-bold text-blue-600">5</div>
+                  <div className="text-sm text-gray-600">Discharges This Month</div>
+                </div>
+                <div className="bg-white rounded-xl shadow-sm border p-6">
+                  <div className="text-3xl font-bold text-orange-600">3</div>
+                  <div className="text-sm text-gray-600">Upcoming Admissions</div>
+                </div>
+              </div>
+              <div className="bg-white rounded-xl shadow-sm border overflow-hidden">
+                <div className="p-6 border-b"><h3 className="text-lg font-semibold">Patient Time Periods</h
